@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const mongoose = require('mongoose')
 
-const assignRoom = require('./assignRoom')
+const assignRoom = require('./game/assignRoom')
 
 // use the express-static middleware
 app.use(express.static("public"));

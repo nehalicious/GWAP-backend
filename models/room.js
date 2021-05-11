@@ -27,7 +27,8 @@ const sessionSchema = new Schema({
 
 const roomSchema = new Schema({
     players: [playerSchema],
-    sessions: [sessionSchema]
+    sessions: [sessionSchema],
+    started: Boolean
 });
 
 module.exports = mongoose.model('Room', roomSchema);
