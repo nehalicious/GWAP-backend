@@ -1,5 +1,14 @@
+const Room = require('./models/room')
+
+
 const assign = (req, res) => {
-    res.send("Room 1")
+    const room = new Room({
+        name: 'XXX',
+        session: 1
+    });
+    room.save()
+        .then(doc=>res.send(doc))
+        .catch(err=> console.log(error))
 };
 
-module.exports = {assign}
+module.exports = {assign};
