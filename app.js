@@ -1,12 +1,18 @@
 const express = require("express");
 const app = express();
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-const assignRoom = require('./game/assignRoom')
+const assignRoom = require('./game/assignRoom');
+const player = require('./game/player');
+const cors = require('cors');
 
 // use the express-static middleware
 app.use(express.static("public"));
 app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:3000'
+}));
+
 
 const url = "mongodb+srv://nkalia:Buddy2008@cluster0.f61r4.mongodb.net/game?retryWrites=true&w=majority"
 
@@ -27,6 +33,7 @@ app.listen(process.env.PORT || 8000,
     () => console.log("Server is running..."));
 
 app.get('/assignRoom', assignRoom.assign);
+app.post('/player', player.createPlayer);
 
 //
 // MongoClient.connect(connectionString, { useUnifiedTopology: true })
