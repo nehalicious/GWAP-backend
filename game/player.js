@@ -1,16 +1,18 @@
 const Player = require('../models/player');
 
-const createPlayer = (req, res) => {
+const createPlayer = (name) => {
 
     const player = new Player({
-        name: req.body.name,
+        name: name,
         points: 0,
         type: "N"
     });
 
-    player.save()
-        .then(doc=>res.send(doc))
-        .catch(err=> console.log(err))
+    const player_obj = player.save()
+        .then(doc=>{return doc})
+        .catch(err=> {return false});
+
+    return player_obj
 };
 
 module.exports = {createPlayer};
