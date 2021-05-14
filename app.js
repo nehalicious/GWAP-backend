@@ -30,22 +30,55 @@ const io = socketio(server, {
 
 io.on('connection', socket => {
     console.log("new websocket connection");
-    socket.emit('message', 'welcome')
+    socket.emit('message', 'welcome');
 
+    /**
+     * When user signs in, send him player id + assign him to a room.
+     * Broadcast to everyone in the room that $playername has joined.
+     */
     socket.on('player', async ({name}) => {
         const player_obj = await player.createPlayer(name);
         if(player_obj) {
             socket.emit('player', player_obj);
         }
+        /** 
+         * If this is 4th player in the room, send a session (start signal + room)
+         */
     });
 
-    socket.on('createRoom', async ({player_id})=> {
-        console.log(player_id)
+    /**
+     * When user sends hint, add hint to list.
+     */
+    socket.on('hint', () => {
+        /**
+         *  If this hint is #3 (last hint), broadcast hints to all player in the room
+         */
     });
 
-    socket.on('joinRoom', async ({player_id, room_id})=>{
-        console.log('room_id')
+    /**
+     * When user sends vote, add vote to list
+     */
+    socket.on('vote', () => {
+        /**
+         * If this is vote #3 -
+         * 1) broadcast votes to everyone
+         * 2) broadcast most voted message to everyone
+         */
+    });
+
+    /**
+     * When user sends guess, broadcast guess to everyone in room
+     */
+    socket.on('guess', ()=> {
+        /**
+         * If guess is correct -
+         * Save room hints to scene
+         * Change player types
+         * send new session
+         */
     })
+
+
 });
 
 const PORT = 8000 || process.env.port;
