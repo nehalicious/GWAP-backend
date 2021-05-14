@@ -2,6 +2,7 @@ const Player = require('../models/player');
 const Room = require('../models/room');
 
 let last_room_id = null;
+const last_room = Room.findById(last_room_id);
 
 /**
  * Create a room and add player to it
@@ -16,14 +17,14 @@ const createRoom  = (player_id) => {
         started: false
     });
 
-    const created_room = room.save()
-        .then(doc=>{
+    return room.save()
+        .then(doc => {
             last_room_id = doc._id;
             return doc;
         })
-        .catch(error=> {return false});
-
-    return created_room;
+        .catch(error => {
+            return false
+        });
 };
 
 /**
@@ -33,16 +34,15 @@ const createRoom  = (player_id) => {
  * Returns room if successfully saved, else returns false
  */
 const addToRoom = (player_id) => {
-    const room = Room.findById(last_room_id);
-    room.players.push(player_id);
+    last_room.players.push(player_id);
 
-    const created_room = room.save()
-        .then(doc=>{
+    return last_room.save()
+        .then(doc => {
             return doc
         })
-        .catch(err => {return false})
-
-    return created_room;
+        .catch(err => {
+            return false
+        });
 };
 
 /**
@@ -54,7 +54,7 @@ const addToRoom = (player_id) => {
  */
 const getRoom = (player_id) => {
     let room;
-    if(last_room_id === null || Room.findById(last_room_id).players.length === 4) {
+    if(last_room_id === null || last_room.players.length === 4) {
         room = createRoom(player_id)
     } else {
         room = addToRoom(player_id)
@@ -72,7 +72,7 @@ const createPlayer = (name) => {
     const player = new Player({
         name: name,
         points: 0,
-        type: "N"
+        type: last_room.players.length === 3 ? "G" : "N"
     });
 
     const player_obj = player.save()

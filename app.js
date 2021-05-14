@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const http = require('http');
 const socketio = require('socket.io');
 const player = require('./game/player');
+const session = require('./game/session');
+const vote = require('./game/vote');
 
 const app = express();
 
@@ -37,39 +39,57 @@ io.on('connection', socket => {
      * Broadcast to everyone in the room that $playername has joined.
      */
     socket.on('player', async ({name}) => {
-        const player_obj = await player.createPlayer(name);
-        if(player_obj) {
-            socket.emit('player', player_obj);
+        const {player_obj, room} = await player.createPlayer(name);
+        if(player_obj && room) {
+            socket.join(room._id);
+            socket.emit('player', {player_obj, room});
         }
         /** 
          * If this is 4th player in the room, send a session (start signal + room)
          */
+        if(room.players.length === 4) {
+            const {room, session} = session.newSession(room._id)
+            socket.to(room._id).emit('session', session);
+        }
     });
 
     /**
      * When user sends hint, add hint to list.
      */
-    socket.on('hint', () => {
+    socket.on('hint', (room_id, round_id, hint) => {
+        const {round, sent_hint} = session.addHint(round_id, hint);
+        socket.emit('yourHint', sent_hint);
         /**
          *  If this hint is #3 (last hint), broadcast hints to all player in the room
          */
+        if(round.hints.length === 3) {
+            socket.to(room_id).broadcast('hint', round.hints)
+        }
     });
 
     /**
      * When user sends vote, add vote to list
      */
-    socket.on('vote', () => {
+    socket.on('vote', (hint_id, room_id, round_id) => {
+        const round = vote.saveVote(hint_id, round_id);
         /**
          * If this is vote #3 -
          * 1) broadcast votes to everyone
          * 2) broadcast most voted message to everyone
          */
+        if(round.votes === 3) {
+            socket.to(room_id).broadcast('votes', round.hints);
+        }
     });
 
     /**
      * When user sends guess, broadcast guess to everyone in room
      */
-    socket.on('guess', ()=> {
+    socket.on('guess', (guess, room_id, correct)=> {
+        socket.to(room_id).broadcast(guess);
+        if(!correct) {
+            //create new round and broadcast
+        }
         /**
          * If guess is correct -
          * Save room hints to scene
