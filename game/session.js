@@ -4,17 +4,21 @@ const Room = require('../models/room');
 const Hint = require('../models/hint');
 
 
-const saveToRound = (round, hint) => {
+const saveToRound = async (round, hint) => {
     round.hints.push(hint._id);
 
-    return round.save()
+    let ans =  await round.save()
         .then(doc=> {return doc})
         .catch(err => {return false})
+
+    return ans;
 };
 
 
-const addHint = (round_id, hint) => {
-    const round = Round.findById(round_id);
+const addHint = async (round_id, hint) => {
+    const round = await Round.findById(round_id)
+        .then(doc=> {return doc})
+        .catch(err=> {console.log(err)});
 
     const h = new Hint({
         hint: hint.text,
@@ -22,28 +26,38 @@ const addHint = (round_id, hint) => {
         votes: 0
     });
 
-    return h.save()
-        .then(doc=> {
-            const r = saveToRound(round, doc);
+    const ans =  await h.save()
+        .then(async doc=> {
+            const r = await saveToRound(round, doc);
             return {doc, r}
         })
         .catch(err => {return false})
+
+    return ans
 };
 
-const addSession = (room, session_id) => {
+const addSession = async (room, session_id) => {
     room.sessions.push(session_id);
 
-    return room.save()
+    const ans = await room.save()
         .then(doc=>{return doc})
-        .catch(err => {return false})
+        .catch(err => {return false});
+
+    return ans;
 };
 
 /**
  * Create a new session for a room
  * @param room_id
  */
-const newSession = (room_id) => {
-    let room = Room.findById(room_id);
+const newSession = async (room_id) => {
+
+    let room = await Room.findById(room_id)
+        .then(doc=> {return doc})
+        .catch(err=> {console.log(err); return false;});
+
+    console.log(room);
+
     const players = room.players;
     let guesser;
     let narrators = [];
@@ -61,20 +75,26 @@ const newSession = (room_id) => {
         votes: 0
     });
 
+    let r = await round.save()
+        .then(doc=> {return doc})
+        .catch(err=> console.log(err));
+
     const session = new Session({
         scene: 'kitchen',
-        rounds: [round],
+        rounds: [r._id],
         guesser: guesser,
         narrators: narrators,
         guessed: false
     });
 
-    return session.save()
-        .then(doc=> {
-            room = addSession(room, doc._id);
-            return {room, doc}
+    const ans = await session.save()
+        .then(async (doc)=> {
+            room = await addSession(room, doc._id);
+            return {room: room, new_session: doc}
         })
-        .catch(err => {return false})
+        .catch(err => {return false});
+
+    return ans;
 };
 
-module.exports = {newSession, addHint}
+module.exports = {newSession, addHint};
