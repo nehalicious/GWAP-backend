@@ -2,7 +2,14 @@ const Player = require('../models/player');
 const Room = require('../models/room');
 
 let last_room_id = null;
-const last_room = Room.findById(last_room_id);
+
+const getRoom = async (room_id) => {
+    const room = await Room.findById(room_id)
+        .then(doc=> {return doc})
+        .catch(err=> {console.log(err); return false})
+
+    return room
+};
 
 /**
  * Create a room and add player to it
@@ -10,14 +17,14 @@ const last_room = Room.findById(last_room_id);
  * @returns {Promise<T | boolean>}
  * If room is created, return room, else return false
  */
-const createRoom  = (player_id) => {
+const createRoom  = async (player_id) => {
     const room = new Room({
         players: [player_id],
         sessions: [],
         started: false
     });
 
-    return room.save()
+    const ans = await room.save()
         .then(doc => {
             last_room_id = doc._id;
             return doc;
@@ -25,6 +32,7 @@ const createRoom  = (player_id) => {
         .catch(error => {
             return false
         });
+    return ans
 };
 
 /**
@@ -33,16 +41,18 @@ const createRoom  = (player_id) => {
  * @returns {Promise<T | boolean>}
  * Returns room if successfully saved, else returns false
  */
-const addToRoom = (player_id) => {
-    last_room.players.push(player_id);
+const addToRoom = async (player_id) => {
+    const room = await getRoom(last_room_id);
+    room.players.push(player_id);
 
-    return last_room.save()
+    const ans = await room.save()
         .then(doc => {
             return doc
         })
         .catch(err => {
             return false
         });
+    return ans;
 };
 
 /**
@@ -52,14 +62,28 @@ const addToRoom = (player_id) => {
  * Returns room if successfully created and found room,
  * else returns false
  */
-const getRoom = (player_id) => {
+const assignRoom = async (player_id) => {
+    let last_room = await getRoom(last_room_id);
     let room;
     if(last_room_id === null || last_room.players.length === 4) {
-        room = createRoom(player_id)
+        room = await createRoom(player_id)
     } else {
-        room = addToRoom(player_id)
+        room = await addToRoom(player_id)
     }
     return room;
+};
+
+const getType = async () => {
+    let last_room = await getRoom(last_room_id);
+    if(last_room_id === null) {
+        return 'N';
+    } else if(last_room.players.length === 3) {
+        return 'G'
+    } else if(last_room.players.length < 3) {
+        return 'N'
+    } else {
+        return 'N'
+    }
 };
 
 /**
@@ -67,22 +91,26 @@ const getRoom = (player_id) => {
  * @param name: Name of the player to be added
  * @returns {{player_obj: Promise<T | boolean>, room: Promise<T|boolean>}}
  */
-const createPlayer = (name) => {
+const createPlayer = async (name) => {
 
     const player = new Player({
         name: name,
         points: 0,
-        type: last_room.players.length === 3 ? "G" : "N"
+        type: await getType()
     });
 
-    const player_obj = player.save()
-        .then(doc=>{return doc})
-        .catch(err=> {return false});
+    const player_obj = await player.save()
+        .then(doc=>{
+            return doc
+        })
+        .catch(err=> {
+            return false
+        });
 
     let room;
 
     if(player_obj) {
-        room = getRoom(player_obj._id)
+        room = await assignRoom(player_obj._id)
     }
 
     return {player_obj, room}
