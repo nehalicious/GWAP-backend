@@ -41,9 +41,18 @@ io.on('connection', socket => {
     socket.on('player', async ({name}) => {
         const {player_obj, room} = await player.createPlayer(name);
         if(player_obj && room) {
+            console.log(room._id)
 
-            socket.join(room._id);
-            io.in(room._id).emit('player', {player_obj, room})
+            socket.join(room._id.toString());
+            /**
+             * Braodcast this player's details to himself
+             */
+            socket.emit('player', {player_obj, room});
+            /**
+             * Broadcast to all players in the room about new join
+             */
+            io.in(room._id.toString()).emit('join', {player_obj, room});
+            // socket.broadcast.emit('join', 'obj');
 
             /**
              * If this is 4th player in the room, send a session (start signal + room)
@@ -51,7 +60,7 @@ io.on('connection', socket => {
             if(room.players.length === 4) {
             // if(true){
                 const {updated_room, new_session} = await session.newSession(room._id);
-                io.in(room._id).emit('session', new_session);
+                io.in(room._id.toString()).emit('session', new_session);
             }
         }
 
