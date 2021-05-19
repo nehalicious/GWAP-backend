@@ -34,6 +34,10 @@ io.on('connection', socket => {
     console.log("new websocket connection");
     socket.emit('message', 'welcome');
 
+    socket.on('hint', ({player, session, hint}) => {
+        socket.emit('receive_hint', 'happy')
+    });
+
     /**
      * When user signs in, send him player id + assign him to a room.
      * Broadcast to everyone in the room that $playername has joined.
@@ -60,6 +64,7 @@ io.on('connection', socket => {
             if(room.players.length === 4) {
             // if(true){
                 const {updated_room, new_session} = await session.newSession(room._id);
+                console.log(new_session);
                 io.in(room._id.toString()).emit('session', new_session);
             }
         }
@@ -69,16 +74,16 @@ io.on('connection', socket => {
     /**
      * When user sends hint, add hint to list.
      */
-    socket.on('hint', (room_id, round_id, hint) => {
-        const {round, sent_hint} = session.addHint(round_id, hint);
-        socket.emit('yourHint', sent_hint);
-        /**
-         *  If this hint is #3 (last hint), broadcast hints to all player in the room
-         */
-        if(round.hints.length === 3) {
-            socket.to(room_id).broadcast('hint', round.hints)
-        }
-    });
+    // socket.on('hint', (player, session, round, hint_id, hint) => {
+    //     const {round, sent_hint} = session.addHint(player, round_id, hint_id, hint);
+    //     socket.emit('yourHint', sent_hint);
+    //     /**
+    //      *  If this hint is #3 (last hint), broadcast hints to all player in the room
+    //      */
+    //     if(round.hints.length === 3) {
+    //         socket.to(room_id).broadcast('hint', round.hints)
+    //     }
+    // });
 
     /**
      * When user sends vote, add vote to list

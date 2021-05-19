@@ -1,40 +1,7 @@
 const Session = require('../models/session');
 const Round = require('../models/round');
 const Room = require('../models/room');
-const Hint = require('../models/hint');
 
-
-const saveToRound = async (round, hint) => {
-    round.hints.push(hint._id);
-
-    let ans =  await round.save()
-        .then(doc=> {return doc})
-        .catch(err => {return false})
-
-    return ans;
-};
-
-
-const addHint = async (round_id, hint) => {
-    const round = await Round.findById(round_id)
-        .then(doc=> {return doc})
-        .catch(err=> {console.log(err)});
-
-    const h = new Hint({
-        hint: hint.text,
-        template: hint.template,
-        votes: 0
-    });
-
-    const ans =  await h.save()
-        .then(async doc=> {
-            const r = await saveToRound(round, doc);
-            return {doc, r}
-        })
-        .catch(err => {return false})
-
-    return ans
-};
 
 const addSession = async (room, session_id) => {
     room.sessions.push(session_id);
@@ -97,4 +64,4 @@ const newSession = async (room_id) => {
     return ans;
 };
 
-module.exports = {newSession, addHint};
+module.exports = {newSession};
