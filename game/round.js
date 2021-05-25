@@ -50,4 +50,24 @@ const addHint = async (player_id, round_id, hint_id, hint) => {
     return data
 };
 
-module.exports = { addHint };
+const getMaxHint = async (round_id) => {
+    const hints = await Round.findById(round_id)
+        .populate("hints")
+        .then(doc=>{console.log(doc); return doc.hints})
+        .catch(err=>console.log(err));
+
+    let maxVoted = hints[0];
+
+    for(let i =0; i<hints.length; i++) {
+        if(hints[i].votes> maxVoted.votes) {
+            maxVoted = hints[i]
+        }
+    }
+
+    console.log(maxVoted);
+
+    return maxVoted;
+};
+
+
+module.exports = { addHint, getMaxHint };

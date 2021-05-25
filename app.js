@@ -82,8 +82,7 @@ io.on('connection', socket => {
         socket.emit('yourHint', sent_hint);
         console.log(room_id);
         io.in(room_id).emit('hint', sent_hint);
-        // socket.to(room_id).broadcast('hint', sent_hint);
-        // socket.broadcast.to(room_id).emit('hint', sent_hint);
+
         /**
          *  If this hint is #3 (last hint), broadcast hints to all player in the room
          */
@@ -95,18 +94,21 @@ io.on('connection', socket => {
     /**
      * When user sends vote, add vote to list
      */
-    socket.on('vote', (hint_id) => {
+    socket.on('vote', async ({hint_id, room_id, round_id}) => {
         console.log('received vote for');
         console.log(hint_id);
-        // const round = vote.saveVote(hint_id, round_id);
-        // /**
-        //  * If this is vote #3 -
-        //  * 1) broadcast votes to everyone
-        //  * 2) broadcast most voted message to everyone
-        //  */
-        // if(round.votes === 3) {
-        //     socket.to(room_id).broadcast('votes', round.hints);
-        // }
+        const {updated_round, updated_hint} = await vote.saveVote(hint_id, round_id);
+        console.log(updated_hint);
+
+        /**
+         * If this is vote #3 -
+         * 1) broadcast votes to everyone
+         * 2) broadcast most voted message to everyone
+         */
+        if(updated_round.votes >= 3) {
+            const maxvote = await round.getMaxHint(round_id);
+            io.in(room_id).emit('selectedHint', maxvote);
+        }
     });
 
     /**
