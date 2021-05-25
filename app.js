@@ -5,6 +5,7 @@ const socketio = require('socket.io');
 const player = require('./game/player');
 const session = require('./game/session');
 const vote = require('./game/vote');
+const round = require('./game/round');
 
 const app = express();
 
@@ -25,8 +26,8 @@ db.on('error', err => {
 
 const io = socketio(server, {
     cors: {
-        // origin: "http://localhost:3000",
-        origin: 'https://gwap-frontend.vercel.app',
+        origin: "http://localhost:3000",
+        // origin: 'https://gwap-frontend.vercel.app',
         methods: ["GET", "POST"]
     }
 });
@@ -35,9 +36,9 @@ io.on('connection', socket => {
     console.log("new websocket connection");
     socket.emit('message', 'welcome');
 
-    socket.on('hint', ({player, session, hint}) => {
-        socket.emit('receive_hint', 'happy')
-    });
+    // socket.on('hint', ({player, session, hint}) => {
+    //     socket.emit('receive_hint', 'happy')
+    // });
 
     /**
      * When user signs in, send him player id + assign him to a room.
@@ -75,16 +76,21 @@ io.on('connection', socket => {
     /**
      * When user sends hint, add hint to list.
      */
-    // socket.on('hint', (player, session, round, hint_id, hint) => {
-    //     const {round, sent_hint} = session.addHint(player, round_id, hint_id, hint);
-    //     socket.emit('yourHint', sent_hint);
-    //     /**
-    //      *  If this hint is #3 (last hint), broadcast hints to all player in the room
-    //      */
-    //     if(round.hints.length === 3) {
-    //         socket.to(room_id).broadcast('hint', round.hints)
-    //     }
-    // });
+    socket.on('hint', async ({player_id, session_id, round_id, hint_id, hint_text, room_id}) => {
+
+        const {sent_hint, updated_round} = await round.addHint(player_id, round_id, hint_id, hint_text);
+        console.log('update_round');
+        console.log(updated_round);
+        console.log('hint');
+        console.log(sent_hint);
+        socket.emit('yourHint', sent_hint);
+        /**
+         *  If this hint is #3 (last hint), broadcast hints to all player in the room
+         */
+        if(updated_round.hints.length === 3) {
+            socket.to(room_id).broadcast('hint', updated_round.hints)
+        }
+    });
 
     /**
      * When user sends vote, add vote to list
@@ -120,7 +126,7 @@ io.on('connection', socket => {
 
 });
 
-const PORT = 8000 || process.env.port;
+const PORT = process.env.PORT || 8000;
 
 server.listen(PORT, ()=> console.log(`Server is running on port ${PORT}`));
 

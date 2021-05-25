@@ -1,6 +1,6 @@
 const Hint = require('../models/hint');
 const Round= require('../models/round');
-
+const mongoose = require('mongoose');
 
 const saveToRound = async (round, hint) => {
     round.hints.push(hint._id);
@@ -13,26 +13,41 @@ const saveToRound = async (round, hint) => {
 };
 
 
-const addHint = async (player, round_id, hint_id, hint) => {
+const addHint = async (player_id, round_id, hint_id, hint) => {
+    // return "hello"
     const round = await Round.findById(round_id)
-        .then(doc=> {return doc})
+        .then(doc=> {console.log("found round"); return doc})
         .catch(err=> {console.log(err)});
 
+    console.log(player_id);
+    console.log("printed pid")
+    // console.log(round_id);
+    // console.log(hint_id);
+    // console.log(hint);
+
     const h = new Hint({
-        player: player,
-        hint: hint.text,
-        template: hint_id,
+        player: player_id,
+        hint: hint,
+        templateID: hint_id,
         votes: 0
     });
 
     const ans =  await h.save()
         .then(async doc=> {
+            console.log("created hint")
+            console.log(doc);
             const r = await saveToRound(round, doc);
+            //here doc is the hint, r is the round
             return {doc, r}
         })
-        .catch(err => {return false})
+        .catch(err => {console.log(err); return false})
 
-    return ans
+    const data = {
+        updated_round: ans.r,
+        sent_hint: ans.doc
+    };
+
+    return data
 };
 
-module.exports = { addHint }
+module.exports = { addHint };
