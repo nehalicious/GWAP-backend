@@ -26,8 +26,8 @@ db.on('error', err => {
 
 const io = socketio(server, {
     cors: {
-        // origin: "http://localhost:3000",
-        origin: 'https://gwap-frontend.vercel.app',
+        origin: "http://localhost:3000",
+        // origin: 'https://gwap-frontend.vercel.app',
         methods: ["GET", "POST"]
     }
 });
@@ -116,8 +116,8 @@ io.on('connection', socket => {
     /**
      * When user sends guess, broadcast guess to everyone in room
      */
-    socket.on('guess', (guess, room_id, correct)=> {
-        socket.to(room_id).broadcast(guess);
+    socket.on('guess', ({guess, room_id, correct})=> {
+        io.in(room_id).emit('guess', guess);
         if(!correct) {
             //create new round and broadcast
         }
