@@ -26,8 +26,8 @@ db.on('error', err => {
 
 const io = socketio(server, {
     cors: {
-        origin: "http://localhost:3000",
-        // origin: 'https://gwap-frontend.vercel.app',
+        // origin: "http://localhost:3000",
+        origin: 'https://gwap-frontend.vercel.app',
         methods: ["GET", "POST"]
     }
 });
