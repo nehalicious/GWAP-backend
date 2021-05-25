@@ -53,7 +53,7 @@ const addHint = async (player_id, round_id, hint_id, hint) => {
 const getMaxHint = async (round_id) => {
     const hints = await Round.findById(round_id)
         .populate("hints")
-        .then(doc=>{console.log(doc); return doc.hints})
+        .then(doc=>{return doc.hints})
         .catch(err=>console.log(err));
 
     let maxVoted = hints[0];

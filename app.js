@@ -96,9 +96,9 @@ io.on('connection', socket => {
      */
     socket.on('vote', async ({hint_id, room_id, round_id}) => {
         console.log('received vote for');
-        console.log(hint_id);
         const {updated_round, updated_hint} = await vote.saveVote(hint_id, round_id);
         console.log(updated_hint);
+        console.log(updated_round);
 
         /**
          * If this is vote #3 -
@@ -106,8 +106,10 @@ io.on('connection', socket => {
          * 2) broadcast most voted message to everyone
          */
         if(updated_round.votes >= 3) {
+            console.log("sending");
             const maxvote = await round.getMaxHint(round_id);
             io.in(room_id).emit('selectedHint', maxvote);
+            console.log("emitted");
         }
     });
 
