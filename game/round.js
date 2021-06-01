@@ -1,5 +1,6 @@
 const Hint = require('../models/hint');
 const Round= require('../models/round');
+const Session = require('../models/session');
 const mongoose = require('mongoose');
 
 const saveToRound = async (round, hint) => {
@@ -10,6 +11,25 @@ const saveToRound = async (round, hint) => {
         .catch(err => {return false})
 
     return ans;
+};
+
+const nextRound = async(session_id) => {
+    let session = await Session.findById(session_id);
+
+    const round = new Round( {
+        hints: [],
+        votes: 0
+    });
+
+    let r = await round.save()
+        .then(doc=> {return doc})
+        .catch(err=> console.log(err));
+
+    session.rounds.push(r);
+
+    let saved_session = await session.save().then(doc=> {return doc}).catch(err=> {console.log(err)})
+
+    return ({updated_session: saved_session, new_round: r});
 };
 
 
@@ -70,4 +90,4 @@ const getMaxHint = async (round_id) => {
 };
 
 
-module.exports = { addHint, getMaxHint };
+module.exports = { addHint, getMaxHint, nextRound };

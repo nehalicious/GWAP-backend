@@ -26,8 +26,8 @@ db.on('error', err => {
 
 const io = socketio(server, {
     cors: {
-        // origin: "http://localhost:3000",
-        origin: 'https://gwap-frontend.vercel.app',
+        origin: "http://localhost:3000",
+        // origin: 'https://gwap-frontend.vercel.app',
         methods: ["GET", "POST"]
     }
 });
@@ -64,7 +64,7 @@ io.on('connection', socket => {
              * If this is 4th player in the room, send a session (start signal + room)
              */
             if(room.players.length === 4) {
-            // if(true){
+                // if(true){
                 const {updated_room, new_session} = await session.newSession(room._id);
                 console.log(new_session);
                 io.in(room._id.toString()).emit('session', new_session);
@@ -116,17 +116,21 @@ io.on('connection', socket => {
     /**
      * When user sends guess, broadcast guess to everyone in room
      */
-    socket.on('guess', ({guess, room_id, correct})=> {
+    socket.on('guess', async ({guess, room_id, session_id, correct})=> {
         io.in(room_id).emit('guess', guess);
         if(!correct) {
-            //create new round and broadcast
+            let updated_session, new_round = await round.nextRound(session_id);
+            io.in(room_id).emit('round', new_round);
+        } else {
+            /**
+             * If guess is correct -
+             * Save room hints to scene
+             * Change player types
+             * send new session
+             */
+            let new_session =await session.newSession(room_id);
+            io.in(room_id).emit('session', new_session);
         }
-        /**
-         * If guess is correct -
-         * Save room hints to scene
-         * Change player types
-         * send new session
-         */
     })
 
 
