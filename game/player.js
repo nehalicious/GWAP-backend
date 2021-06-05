@@ -3,12 +3,22 @@ const Room = require('../models/room');
 
 let last_room_id = null;
 
+
 const getRoom = async (room_id) => {
     const room = await Room.findById(room_id)
         .then(doc=> {return doc})
         .catch(err=> {console.log(err); return false})
 
     return room
+};
+
+const getScores = async(room_id) => {
+    const room = await Room.findById(room_id)
+        .populate("players")
+        .then(doc=> {return doc})
+        .catch(err=>console.log(err))
+
+    return room;
 };
 
 /**
@@ -116,6 +126,4 @@ const createPlayer = async (name) => {
     return {player_obj, room}
 };
 
-
-
-module.exports = {createPlayer};
+module.exports = {createPlayer, getScores};

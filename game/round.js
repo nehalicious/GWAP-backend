@@ -3,22 +3,26 @@ const Round= require('../models/round');
 const Session = require('../models/session');
 const mongoose = require('mongoose');
 
+const round_weight = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+
 const saveToRound = async (round, hint) => {
     round.hints.push(hint._id);
 
     let ans =  await round.save()
         .then(doc=> {return doc})
-        .catch(err => {return false})
+        .catch(err => {return false});
 
     return ans;
 };
 
 const nextRound = async(session_id) => {
     let session = await Session.findById(session_id);
+    const index = session.rounds.length;
 
     const round = new Round( {
         hints: [],
-        votes: 0
+        votes: 0,
+        weight: round_weight[index]
     });
 
     let r = await round.save()

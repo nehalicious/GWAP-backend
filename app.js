@@ -99,6 +99,7 @@ io.on('connection', socket => {
         const {updated_round, updated_hint} = await vote.saveVote(hint_id, round_id);
         console.log(updated_hint);
         console.log(updated_round);
+        //TODO: Add points to hint for that player
 
         /**
          * If this is vote #3 -
@@ -110,6 +111,9 @@ io.on('connection', socket => {
             const maxvote = await round.getMaxHint(round_id);
             io.in(room_id).emit('selectedHint', maxvote);
             console.log("emitted");
+            const updated_room = await player.getScores(room_id);
+            io.in(room_id).emit('update_scores', updated_room);
+            // TODO: Emit points received by players
         }
     });
 
@@ -128,7 +132,8 @@ io.on('connection', socket => {
              * Change player types
              * send new session
              */
-            let new_session =await session.newSession(room_id);
+            const {updated_room, new_session} = await session.newSession(room._id);
+            // let new_session =await session.newSession(room_id);
             io.in(room_id).emit('session', new_session);
         }
     })

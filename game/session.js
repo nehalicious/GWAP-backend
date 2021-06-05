@@ -2,6 +2,7 @@ const Session = require('../models/session');
 const Round = require('../models/round');
 const Room = require('../models/room');
 
+const session_scenes = ['kitchen', 'park', 'garden', 'bathroom', 'living room', 'bedroom', 'amusement park'];
 
 const addSession = async (room, session_id) => {
     room.sessions.push(session_id);
@@ -39,7 +40,8 @@ const newSession = async (room_id) => {
 
     const round = new Round({
         hints: [],
-        votes: 0
+        votes: 0,
+        weight: 10
     });
 
     let r = await round.save()
