@@ -21,6 +21,7 @@ const addSession = async (room, session_id) => {
 const newSession = async (room_id) => {
 
     let room = await Room.findById(room_id)
+        .populate("players")
         .then(doc=> {return doc})
         .catch(err=> {console.log(err); return false;});
 
@@ -31,8 +32,8 @@ const newSession = async (room_id) => {
     let narrators = [];
 
     for (let i =0; i< players.length; i++) {
-        if(players[i].type === 'G') {
-            guesser =players[i]
+        if(players[i].type === "G") {
+            guesser = players[i]._id
         } else {
             narrators.push(players[i])
         }
