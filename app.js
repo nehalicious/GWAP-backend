@@ -132,7 +132,7 @@ io.on('connection', socket => {
              * Change player types
              * send new session
              */
-            const {updated_room, new_session} = await session.newSession(room._id);
+            const {updated_room, new_session} = await session.newSession(room_id);
             // let new_session =await session.newSession(room_id);
             io.in(room_id).emit('session', new_session);
         }
