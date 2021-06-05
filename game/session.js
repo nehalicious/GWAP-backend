@@ -25,8 +25,8 @@ const newSession = async (room_id) => {
         .then(doc=> {return doc})
         .catch(err=> {console.log(err); return false;});
 
-    if(room.sessions.length === 4) {
-        return {room: room, new_session: false}
+    if(room.sessions.length === 1) {
+        return {updated_room: room, new_session: false}
     }
 
     console.log(room);
