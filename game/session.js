@@ -1,6 +1,7 @@
 const Session = require('../models/session');
 const Round = require('../models/round');
 const Room = require('../models/room');
+const player = require('./player');
 
 const sessions = [
     ['park', 'garden', 'bathroom', 'living room'],
@@ -9,11 +10,41 @@ const sessions = [
     ['library', 'bank', 'market', 'restaurant']
 ];
 
+const sequences = [
+    ['N', 'N', 'N', 'G'],
+    ['N', 'N', 'G', 'N'],
+    ['N', 'G', 'N', 'N'],
+    ['G', 'N', 'N', 'N'],
+];
+
+const assignRoles = async (players, room) => {
+    let guesser;
+    let narrators = [];
+
+    const sequence = sequences[room.sessions.length];
+    for (let i = 0; i < players.length; i++) {
+        if(players[i].type !== sequence[i]) {
+            await player.assignType(players[i]._id, sequence[i]);
+        }
+        if(sequence[i] === 'G') {
+            guesser = players[i]._id
+        } else {
+            narrators.push(players[i])
+        }
+        // if (players[i].type === "G") {
+        //     guesser = players[i]._id
+        // } else {
+        //     narrators.push(players[i])
+        // }
+    }
+
+    return {guesser: guesser, narrators: narrators}
+};
+
 const getRandomScene = (index) => {
     let group = sessions[Math.floor(Math.random() * sessions.length)]
     return group[index];
 };
-// const session_scenes = ['park', 'garden', 'bathroom', 'living room', 'bedroom', 'amusement park', 'kitchen'];
 
 const addSession = async (room, session_id) => {
     room.sessions.push(session_id);
@@ -36,23 +67,15 @@ const newSession = async (room_id) => {
         .then(doc=> {return doc})
         .catch(err=> {console.log(err); return false;});
 
-    if(room.sessions.length === 1) {
+    if(room.sessions.length === 4) {
         return {updated_room: room, new_session: false}
     }
 
     console.log(room);
 
     const players = room.players;
-    let guesser;
-    let narrators = [];
 
-    for (let i =0; i< players.length; i++) {
-        if(players[i].type === "G") {
-            guesser = players[i]._id
-        } else {
-            narrators.push(players[i])
-        }
-    }
+    let {guesser, narrators} = await assignRoles(players, room)
 
     const round = new Round({
         hints: [],

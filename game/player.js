@@ -83,6 +83,13 @@ const assignRoom = async (player_id) => {
     return room;
 };
 
+const assignType = async (id, type) => {
+    let player = await Player.findById(id);
+    player.type = type;
+    const saved = await player.save().then(doc=>{return doc}).catch(err=>console.log(err));
+    return saved;
+};
+
 const getType = async () => {
     let last_room = await getRoom(last_room_id);
     if(last_room_id === null) {
@@ -126,4 +133,4 @@ const createPlayer = async (name) => {
     return {player_obj, room}
 };
 
-module.exports = {createPlayer, getScores};
+module.exports = {createPlayer, getScores, assignType};
