@@ -2,7 +2,7 @@ const Session = require('../models/session');
 const Round = require('../models/round');
 const Room = require('../models/room');
 
-const session_scenes = ['kitchen', 'park', 'garden', 'bathroom', 'living room', 'bedroom', 'amusement park'];
+const session_scenes = ['park', 'garden', 'bathroom', 'living room', 'bedroom', 'amusement park', 'kitchen'];
 
 const addSession = async (room, session_id) => {
     room.sessions.push(session_id);
@@ -49,7 +49,7 @@ const newSession = async (room_id) => {
         .catch(err=> console.log(err));
 
     const session = new Session({
-        scene: 'kitchen',
+        scene: session_scenes[room.sessions.length],
         rounds: [r._id],
         guesser: guesser,
         narrators: narrators,
