@@ -2,7 +2,18 @@ const Session = require('../models/session');
 const Round = require('../models/round');
 const Room = require('../models/room');
 
-const session_scenes = ['park', 'garden', 'bathroom', 'living room', 'bedroom', 'amusement park', 'kitchen'];
+const sessions = [
+    ['park', 'garden', 'bathroom', 'living room'],
+    [ 'bedroom', 'amusement park', 'kitchen', 'church'],
+    ['cafe', 'hotel', 'club', 'classroom'],
+    ['library', 'bank', 'market', 'restaurant']
+];
+
+const getRandomScene = (index) => {
+    let group = sessions[Math.floor(Math.random() * sessions.length)]
+    return group[index];
+};
+// const session_scenes = ['park', 'garden', 'bathroom', 'living room', 'bedroom', 'amusement park', 'kitchen'];
 
 const addSession = async (room, session_id) => {
     room.sessions.push(session_id);
@@ -54,7 +65,7 @@ const newSession = async (room_id) => {
         .catch(err=> console.log(err));
 
     const session = new Session({
-        scene: session_scenes[room.sessions.length],
+        scene: getRandomScene(room.sessions.length),
         rounds: [r._id],
         guesser: guesser,
         narrators: narrators,
