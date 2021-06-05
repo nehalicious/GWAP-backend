@@ -66,4 +66,11 @@ const newSession = async (room_id) => {
     return ans;
 };
 
-module.exports = {newSession};
+const setCorrect = async (session_id) => {
+    let session = await Session.findById(session_id);
+    session.guessed = true;
+    const sess = await session.save().then(doc=>{console.log(doc); return doc}).catch(err=>{console.log(err)});
+    return sess;
+};
+
+module.exports = {newSession, setCorrect};
