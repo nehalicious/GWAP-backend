@@ -134,8 +134,12 @@ io.on('connection', socket => {
              */
             const correct = await session.setCorrect(session_id);
             const {updated_room, new_session} = await session.newSession(room_id);
-            // let new_session =await session.newSession(room_id);
-            io.in(room_id).emit('session', new_session);
+            if(!new_session) {
+                io.in(room_id).emit('game_over', updated_room)
+            } else {
+                // let new_session =await session.newSession(room_id);
+                io.in(room_id).emit('session', new_session);
+            }
         }
     })
 
