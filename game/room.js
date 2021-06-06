@@ -1,5 +1,4 @@
 const Room = require('../models/room');
-const Player = require('../models/player');
 
 const createRoom = (req, res) => {
     const room = new Room({
@@ -7,9 +6,6 @@ const createRoom = (req, res) => {
         sessions: [],
         started: false
     });
-    // const room = new Room({
-    //     name: req.body.name
-    // })
 
     room.save()
         .then(doc=>res.send(doc))
