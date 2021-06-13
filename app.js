@@ -7,11 +7,13 @@ const session = require('./game/session');
 const vote = require('./game/vote');
 const round = require('./game/round');
 
+const Session = require('./models/session');
+
 const app = express();
 
 const server = http.createServer(app);
 
-const url = "mongodb+srv://nkalia:Buddy2008@cluster0.f61r4.mongodb.net/game?retryWrites=true&w=majority"
+const url = "mongodb+srv://nkalia:Buddy2008@cluster0.f61r4.mongodb.net/trial?retryWrites=true&w=majority"
 mongoose.connect(url, { useNewUrlParser: true });
 
 const db = mongoose.connection;
@@ -26,8 +28,8 @@ db.on('error', err => {
 
 const io = socketio(server, {
     cors: {
-        // origin: "http://localhost:3000",
-        origin: 'https://gwap-frontend.vercel.app',
+        origin: "http://localhost:3000",
+        // origin: 'https://gwap-frontend.vercel.app',
         methods: ["GET", "POST"]
     }
 });
@@ -123,8 +125,20 @@ io.on('connection', socket => {
     socket.on('guess', async ({guess, room_id, session_id, correct, player_id})=> {
         io.in(room_id).emit('guess', guess);
         if(!correct) {
-            let updated_session, new_round = await round.nextRound(session_id);
-            io.in(room_id).emit('round', new_round);
+            let current_session = await Session.findById(session_id);
+            if(current_session.rounds >= 6) {
+                const {updated_room, new_session} = await session.newSession(room_id);
+                if(!new_session) {
+                    io.in(room_id).emit('game_over', updated_room)
+                } else {
+                    // let new_session =await session.newSession(room_id);
+                    io.in(room_id).emit('session', new_session);
+                }
+            }
+            else {
+                let updated_session, new_round = await round.nextRound(session_id);
+                io.in(room_id).emit('round', new_round);
+            }
         } else {
             /**
              * If guess is correct -
