@@ -11,7 +11,7 @@ const app = express();
 
 const server = http.createServer(app);
 
-const url = "mongodb+srv://nkalia:Buddy2008@cluster0.f61r4.mongodb.net/game?retryWrites=true&w=majority"
+const url = "mongodb+srv://nkalia:Buddy2008@cluster0.f61r4.mongodb.net/trial?retryWrites=true&w=majority"
 mongoose.connect(url, { useNewUrlParser: true });
 
 const db = mongoose.connection;
@@ -26,8 +26,8 @@ db.on('error', err => {
 
 const io = socketio(server, {
     cors: {
-        // origin: "http://localhost:3000",
-        origin: 'https://gwap-frontend.vercel.app',
+        origin: "http://localhost:3000",
+        // origin: 'https://gwap-frontend.vercel.app',
         methods: ["GET", "POST"]
     }
 });
