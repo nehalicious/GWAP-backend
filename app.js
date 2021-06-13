@@ -147,7 +147,7 @@ io.on('connection', socket => {
              * send new session
              */
             const correct = await session.setCorrect(session_id);
-            const x = await player.updateScore(player_id, 10);
+            const x = await player.updateScore(player_id, 30);
             const updated_score_room = await player.getScores(room_id);
             io.in(room_id).emit('update_scores', updated_score_room);
 
