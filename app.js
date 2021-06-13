@@ -11,7 +11,7 @@ const app = express();
 
 const server = http.createServer(app);
 
-const url = "mongodb+srv://nkalia:Buddy2008@cluster0.f61r4.mongodb.net/trial?retryWrites=true&w=majority"
+const url = "mongodb+srv://nkalia:Buddy2008@cluster0.f61r4.mongodb.net/game?retryWrites=true&w=majority"
 mongoose.connect(url, { useNewUrlParser: true });
 
 const db = mongoose.connection;
@@ -26,8 +26,8 @@ db.on('error', err => {
 
 const io = socketio(server, {
     cors: {
-        origin: "http://localhost:3000",
-        // origin: 'https://gwap-frontend.vercel.app',
+        // origin: "http://localhost:3000",
+        origin: 'https://gwap-frontend.vercel.app',
         methods: ["GET", "POST"]
     }
 });
@@ -136,6 +136,7 @@ io.on('connection', socket => {
             const x = await player.updateScore(player_id, 10);
             const updated_score_room = await player.getScores(room_id);
             io.in(room_id).emit('update_scores', updated_score_room);
+
             const {updated_room, new_session} = await session.newSession(room_id);
             if(!new_session) {
                 io.in(room_id).emit('game_over', updated_room)

@@ -15,7 +15,7 @@ const getRoom = async (room_id) => {
 const updateScore = async (player_id, increment) => {
     const player = await Player.findById(player_id);
     player.points = player.points + increment;
-    await ans = player.save()
+    const ans =await  player.save()
         .then(doc=> {return doc})
         .catch(err=>console.log(err))
     return ans;
