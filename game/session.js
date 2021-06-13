@@ -29,22 +29,30 @@ const assignRoles = async (players, room) => {
     let guesser;
     let narrators = [];
 
-    const sequence = sequences[room.sessions.length];
-    for (let i = 0; i < players.length; i++) {
-        if(players[i].type !== sequence[i]) {
-            await player.assignType(players[i]._id, sequence[i]);
-        }
-        if(sequence[i] === 'G') {
-            guesser = players[i]._id
+    for(let i =0; i<players.length; i++) {
+        if(players[i].type === 'N') {
+            narrators.push(players[i]._id)
         } else {
-            narrators.push(players[i])
+            guesser = players[i]._id
         }
-        // if (players[i].type === "G") {
-        //     guesser = players[i]._id
-        // } else {
-        //     narrators.push(players[i])
-        // }
-    }
+    };
+    //
+    // const sequence = sequences[room.sessions.length];
+    // for (let i = 0; i < players.length; i++) {
+    //     if(players[i].type !== sequence[i]) {
+    //         await player.assignType(players[i]._id, sequence[i]);
+    //     }
+    //     if(sequence[i] === 'G') {
+    //         guesser = players[i]._id
+    //     } else {
+    //         narrators.push(players[i])
+    //     }
+    //     // if (players[i].type === "G") {
+    //     //     guesser = players[i]._id
+    //     // } else {
+    //     //     narrators.push(players[i])
+    //     // }
+    // }
 
     return {guesser: guesser, narrators: narrators}
 };
@@ -83,7 +91,7 @@ const newSession = async (room_id) => {
 
     const players = room.players;
 
-    let {guesser, narrators} = await assignRoles(players, room)
+    let {guesser, narrators} = await assignRoles(players, room);
 
     const round = new Round({
         hints: [],
