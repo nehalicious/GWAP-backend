@@ -120,7 +120,7 @@ io.on('connection', socket => {
     /**
      * When user sends guess, broadcast guess to everyone in room
      */
-    socket.on('guess', async ({guess, room_id, session_id, correct})=> {
+    socket.on('guess', async ({guess, room_id, session_id, correct, player_id})=> {
         io.in(room_id).emit('guess', guess);
         if(!correct) {
             let updated_session, new_round = await round.nextRound(session_id);
@@ -133,6 +133,10 @@ io.on('connection', socket => {
              * send new session
              */
             const correct = await session.setCorrect(session_id);
+            const x = await player.updateScore(player_id, 10);
+            const updated_score_room = await player.getScores(room_id);
+            io.in(room_id).emit('update_scores', updated_score_room);
+
             const {updated_room, new_session} = await session.newSession(room_id);
             if(!new_session) {
                 io.in(room_id).emit('game_over', updated_room)

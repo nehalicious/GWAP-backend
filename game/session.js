@@ -10,12 +10,20 @@ const sessions = [
     ['library', 'bank', 'market', 'restaurant']
 ];
 
+const scenes = ['cafe', 'club', 'classroom', 'restaurant',
+    'market', 'bank', 'bathroom', 'hotel',
+    'amusement park', 'university', 'kitchen', 'living room'];
+
 const sequences = [
     ['N', 'N', 'N', 'G'],
     ['N', 'N', 'G', 'N'],
     ['N', 'G', 'N', 'N'],
     ['G', 'N', 'N', 'N'],
 ];
+
+const getScene = (index) => {
+    return scenes[index];
+};
 
 const assignRoles = async (players, room) => {
     let guesser;
@@ -67,7 +75,7 @@ const newSession = async (room_id) => {
         .then(doc=> {return doc})
         .catch(err=> {console.log(err); return false;});
 
-    if(room.sessions.length === 4) {
+    if(room.sessions.length >= 12) {
         return {updated_room: room, new_session: false}
     }
 
@@ -88,7 +96,8 @@ const newSession = async (room_id) => {
         .catch(err=> console.log(err));
 
     const session = new Session({
-        scene: getRandomScene(room.sessions.length),
+        scene: getScene(room.sessions.length),
+        // scene: getRandomScene(room.sessions.length),
         rounds: [r._id],
         guesser: guesser,
         narrators: narrators,
