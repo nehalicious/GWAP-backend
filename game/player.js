@@ -12,6 +12,15 @@ const getRoom = async (room_id) => {
     return room
 };
 
+const updateScore = async (player_id, increment) => {
+    const player = await Player.findById(player_id);
+    player.points = player.points + increment;
+    await ans = player.save()
+        .then(doc=> {return doc})
+        .catch(err=>console.log(err))
+    return ans;
+};
+
 const getScores = async(room_id) => {
     const room = await Room.findById(room_id)
         .populate("players")
@@ -133,4 +142,4 @@ const createPlayer = async (name) => {
     return {player_obj, room}
 };
 
-module.exports = {createPlayer, getScores, assignType};
+module.exports = {createPlayer, getScores, assignType, updateScore};
